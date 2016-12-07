@@ -32,8 +32,6 @@ $(function() {
          * and that the URL is not empty.
          */
         it('each feed has a URL', function() {
-            expect(allFeeds).toBeDefined();
-            expect(allFeeds.length).not.toBe(0);
             allFeeds.forEach(function(feed) {
                 expect(feed.url).toBeDefined();
                 expect(feed.url).not.toBe('');
@@ -46,8 +44,6 @@ $(function() {
          * and that the name is not empty.
          */
         it('each feed has a name', function() {
-            expect(allFeeds).toBeDefined();
-            expect(allFeeds.length).not.toBe(0);
             allFeeds.forEach(function(feed) {
                 expect(feed.name).toBeDefined();
                 expect(feed.name).not.toBe('');
@@ -98,81 +94,61 @@ $(function() {
          * the use of Jasmine's beforeEach and asynchronous done() function.
          */
         beforeEach(function(done) {
-            if (allFeeds && (allFeeds.length > 0)) {
-                // call loadFeed on first feed with async callback done()
-                loadFeed(0, function() {
-                    done();
-                });
-            } else {
-                // Oops! Error: no feed
-                throw new Error('No feed');
-                done();
-            }
+            // call loadFeed on first feed with async callback done()
+            loadFeed(0, done);
         });
 
-        it('should return at least one entry to the feed container', function(done) {
+        it('should return at least one entry to the feed container', function() {
             // select all .feed containers that contain a .entry element
             // passes, if selector length is > 0
-            var result = $('.feed').has('.entry');
+            var result = $('.feed .entry');
             expect(result.length).toBeGreaterThan(0);
-            done();
         });
     });
 
     /* Write a new test suite named "New Feed Selection" */
     describe('New Feed Selection', function() {
-        var oldContents, newContents;
-        var oldTitle, newTitle = '';
+        var firstContents, secondContents;
+        var firstTitle, secondTitle = '';
 
         /* Write a test that ensures when a new feed is loaded
          * by the loadFeed function that the content actually changes.
          * Remember, loadFeed() is asynchronous.
          */
         beforeAll(function(done) {
-            // capture initial contents of .feed container and title
-            oldContents = $('.feed').contents();
-            oldTitle = $('.header-title').text();
-            if (allFeeds && (allFeeds.length > 0)) {
-                // call loadfeed on last feed
-                var lastIndex = allFeeds.length - 1;
-                loadFeed(lastIndex, function() {
-                    newContents = $('.feed').contents();
-                    newTitle = $('.header-title').text();
+            // call loadFeed on last feed
+            var lastIndex = allFeeds.length - 1;
+            loadFeed(lastIndex, function() {
+                // on 1st callback, save contents and title from 1st load
+                firstContents = $('.feed').contents();
+                firstTitle = $('.header-title').text();
+                // call loadFeed again on first feed
+                loadFeed(0, function() {
+                    // on 2nd callback, save contents and title from 2nd load
+                    secondContents = $('.feed').contents();
+                    secondTitle = $('.header-title').text();
+                    // 2nd load finished, so call done to trigger tests
                     done();
                 });
-            } else {
-                // Oops! Error: no feed
-                newContents = oldContents;
-                newTitle = oldTitle;
-                throw new Error('No feed');
-                done();
-            }
+            });
         });
 
-        it('title should change', function(done) {
-            // check that title actually loaded
-            expect(newTitle).not.toBe('');
+        it('title should change', function() {
+            // check that titles actually loaded
+            expect(firstTitle).not.toBe('');
+            expect(secondTitle).not.toBe('');
             // check that title changed
-            expect(newTitle).not.toBe(oldTitle);
-            done();
+            expect(secondTitle).not.toBe(firstTitle);
         });
 
-        it('feed content should change', function(done) {
-            // check that some .feed content actually loaded
-            expect(newContents.length).not.toBe(0);
+        it('feed content should change', function() {
+            // check that .feed content actually loaded
+            expect(firstContents.length).toBeDefined();
+            expect(firstContents.length).not.toBe(0);
+            expect(secondContents.length).toBeDefined();
+            expect(secondContents.length).not.toBe(0);
             // check that feed contents changed
-            expect(newContents).not.toBe(oldContents);
-            done();
-        });
-
-        afterAll(function() {
-            if (allFeeds && (allFeeds.length > 0)) {
-                // reload first feed
-                loadFeed(0);
-            } else {
-                // Error: no feed
-                throw new Error('No feed');
-            }
+            expect(secondContents).not.toBe(firstContents);
         });
     });
 
