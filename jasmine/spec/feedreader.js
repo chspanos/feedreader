@@ -108,7 +108,7 @@ $(function() {
 
     /* Write a new test suite named "New Feed Selection" */
     describe('New Feed Selection', function() {
-        var firstContents, secondContents;
+        var firstContents, secondContents = '';
         var firstTitle, secondTitle = '';
 
         /* Write a test that ensures when a new feed is loaded
@@ -120,12 +120,12 @@ $(function() {
             var lastIndex = allFeeds.length - 1;
             loadFeed(lastIndex, function() {
                 // on 1st callback, save contents and title from 1st load
-                firstContents = $('.feed').contents();
+                firstContents = $('.feed').text();
                 firstTitle = $('.header-title').text();
                 // call loadFeed again on first feed
                 loadFeed(0, function() {
                     // on 2nd callback, save contents and title from 2nd load
-                    secondContents = $('.feed').contents();
+                    secondContents = $('.feed').text();
                     secondTitle = $('.header-title').text();
                     // 2nd load finished, so call done to trigger tests
                     done();
@@ -138,17 +138,15 @@ $(function() {
             expect(firstTitle).not.toBe('');
             expect(secondTitle).not.toBe('');
             // check that title changed
-            expect(secondTitle).not.toBe(firstTitle);
+            expect(secondTitle).not.toEqual(firstTitle);
         });
 
         it('feed content should change', function() {
             // check that .feed content actually loaded
-            expect(firstContents.length).toBeDefined();
-            expect(firstContents.length).not.toBe(0);
-            expect(secondContents.length).toBeDefined();
-            expect(secondContents.length).not.toBe(0);
+            expect(firstContents).not.toBe('');
+            expect(secondContents).not.toBe('');
             // check that feed contents changed
-            expect(secondContents).not.toBe(firstContents);
+            expect(secondContents).not.toEqual(firstContents);
         });
     });
 
